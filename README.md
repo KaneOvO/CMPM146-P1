@@ -5,3 +5,5 @@ Navmesh Pathfinding
 Team Member:
 
 Zexuan Li
+
+Malachi Maldonado
