@@ -19,7 +19,9 @@ def find_path (source_point, destination_point, mesh):
     """
 
     path = []
-    boxes = {}
+    boxes = []
+    detail_points = {}
+    segment_number = 0
 
     # step 1 Identify the source and destination boxes.
     sourceBox = None
@@ -46,11 +48,12 @@ def find_path (source_point, destination_point, mesh):
     came_from = dict()
     came_from[sourceBox] = None
 
-    
+    #detail_points[segment_number] = source_point
+    #segment_number+=1
 
     while not frontier.empty():
         current = frontier.get()
-
+        boxes.append(current)
         if current == destinationBox: 
             break
 
@@ -61,6 +64,7 @@ def find_path (source_point, destination_point, mesh):
 
     if destinationBox in came_from:
         print("Found path!")
+        print(path)
     else:
         print("No path!")
     
@@ -68,4 +72,4 @@ def find_path (source_point, destination_point, mesh):
 
 
 
-    return path, boxes.keys()
+    return path, boxes
