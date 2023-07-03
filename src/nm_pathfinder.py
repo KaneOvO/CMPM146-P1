@@ -21,7 +21,7 @@ def find_path (source_point, destination_point, mesh):
     path = []
     boxes = []
     detail_points = {}
-    segment_number = 0
+    point_number = 0
 
     # step 1 Identify the source and destination boxes.
     sourceBox = None
@@ -48,9 +48,9 @@ def find_path (source_point, destination_point, mesh):
     came_from = dict()
     came_from[sourceBox] = None
 
-    #detail_points[segment_number] = source_point
-    #segment_number+=1
-
+    detail_points[point_number] = source_point[0], source_point[1]
+    #path.append(source_point)
+    print(detail_points[point_number])
     while not frontier.empty():
         current = frontier.get()
         boxes.append(current)
@@ -59,17 +59,42 @@ def find_path (source_point, destination_point, mesh):
 
         for next in mesh['adj'][current]:
             if next not in came_from:
+                # find detail point in 'next'
+                if detail_points[point_number][0] <= next[0]:
+                    detail_x = next[0]
+                elif detail_points[point_number][0] >= next[1]:
+                    detail_x = next[1]
+                else:
+                    detail_x = detail_points[point_number][0]
+
+                if detail_points[point_number][1] <= next[2]:
+                    detail_y = next[2]
+                elif detail_points[point_number][1] >= next[3]:
+                    detail_y = next[3]
+                else:
+                    detail_y = detail_points[point_number][1]
+
+                point_number += 1
+                detail_points[point_number] = detail_x, detail_y
+
                 frontier.put(next)
                 came_from[next] = current
 
     if destinationBox in came_from:
         print("Found path!")
-        print(path)
+
+        curr_box = destinationBox
+        path.append(destination_point)
+        while curr_box != sourceBox:
+            path.append(detail_points[boxes.index(curr_box)])
+            curr_box = came_from[curr_box]
+
+        path.append(source_point)
+
     else:
         print("No path!")
-    
 
-
-
-
+    print("source point: ", source_point)
+    print("destination point: ", destination_point)
+    print(path)
     return path, boxes
