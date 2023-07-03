@@ -46,11 +46,10 @@ def find_path (source_point, destination_point, mesh):
             sourceBox = box
         if(x1 <= p3 and x2 >= p3 and y1 <= p4 and y2 >= p4):
             destinationBox = box
-    
+
     if sourceBox == None or destinationBox == None:
         print("No path!")
         return path, boxes
-
 
     # step 2 Implement the simplest complete search algorithm you can
     # a simple BFS   
@@ -60,7 +59,7 @@ def find_path (source_point, destination_point, mesh):
     # came_from[sourceBox] = None
 
     # detail_points[point_number] = source_point[0], source_point[1]
-    # path.append(source_point)
+    # #path.append(source_point)
     # print(detail_points[point_number])
     # while not frontier.empty():
     #     current = frontier.get()
@@ -70,7 +69,7 @@ def find_path (source_point, destination_point, mesh):
 
     #     for next in mesh['adj'][current]:
     #         if next not in came_from:
-    #             #find detail point in 'next'
+    #             # find detail point in 'next'
     #             if detail_points[point_number][0] <= next[0]:
     #                 detail_x = next[0]
     #             elif detail_points[point_number][0] >= next[1]:
@@ -115,7 +114,7 @@ def find_path (source_point, destination_point, mesh):
             break
 
         for next in mesh['adj'][current]:
-            #find detail point in 'next'
+            # find detail point in 'next'
             if detail_points[point_number][0] <= next[0]:
                 detail_x = next[0]
             elif detail_points[point_number][0] >= next[1]:
@@ -130,15 +129,16 @@ def find_path (source_point, destination_point, mesh):
             else:
                 detail_y = detail_points[point_number][1]
 
+            
+
             point_number += 1
             detail_points[point_number] = detail_x, detail_y
-            
+
             new_cost = cost_so_far[current] + Euclidean_distances(detail_points[point_number - 1], detail_points[point_number])
-           
 
             if next not in cost_so_far or new_cost < cost_so_far[next]:
                 cost_so_far[next] = new_cost
-                priority = Euclidean_distances(detail_points[point_number], destination_point)
+                priority = new_cost + Euclidean_distances(detail_points[point_number], destination_point)
                 frontier.put((priority,next))
                 came_from[next] = current 
 
