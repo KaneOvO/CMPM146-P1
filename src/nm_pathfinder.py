@@ -51,46 +51,44 @@ def find_path (source_point, destination_point, mesh):
         print("No path!")
         return path, boxes
 
-    # step 2 Implement the simplest complete search algorithm you can
-    # a simple BFS   
-    frontier = Queue()
-    frontier.put(sourceBox)
-    came_from = dict()
-    came_from[sourceBox] = None
+    # # step 2 Implement the simplest complete search algorithm you can
+    # # a simple BFS   
+    # frontier = Queue()
+    # frontier.put(sourceBox)
+    # came_from = dict()
+    # came_from[sourceBox] = None
 
-    detail_points[point_number] = source_point[0], source_point[1]
-    #path.append(source_point)
-    print(detail_points[point_number])
-    while not frontier.empty():
-        current = frontier.get()
-        boxes.append(current)
-        if current == destinationBox: 
-            break
+    # detail_points[sourceBox] = source_point
 
-        # for next in mesh['adj'][current]:
-        #     if next not in came_from:
-        #         # find detail point in 'next'
-        #         if detail_points[point_number][0] <= next[0]:
-        #             detail_x = next[0]
-        #         elif detail_points[point_number][0] >= next[1]:
-        #             detail_x = next[1]
-        #         else:
-        #             detail_x = detail_points[point_number][0]
+    # while not frontier.empty():
+    #     current = frontier.get()
+    #     boxes.append(current)
+    #     if current == destinationBox: 
+    #         break
 
-        #         if detail_points[point_number][1] <= next[2]:
-        #             detail_y = next[2]
-        #         elif detail_points[point_number][1] >= next[3]:
-        #             detail_y = next[3]
-        #         else:
-        #             detail_y = detail_points[point_number][1]
+    #     for next in mesh['adj'][current]:
+    #         if next not in came_from:
+    #             # find detail point in 'next'
+    #             if detail_points[current][0] <= next[0]:
+    #                 detail_x = next[0]
+    #             elif detail_points[current][0] >= next[1]:
+    #                 detail_x = next[1]
+    #             else:
+    #                 detail_x = detail_points[current][0]
 
-        #         point_number += 1
-        #         detail_points[point_number] = detail_x, detail_y
+    #             if detail_points[current][1] <= next[2]:
+    #                 detail_y = next[2]
+    #             elif detail_points[current][1] >= next[3]:
+    #                 detail_y = next[3]
+    #             else:
+    #                 detail_y = detail_points[current][1]
 
-        #         frontier.put(next)
-        #         came_from[next] = current
+    #             detail_points[next] = detail_x, detail_y
 
-    
+    #             frontier.put(next)
+    #             came_from[next] = current
+
+    # step 4 Implement the A* algorithm
     frontier = PriorityQueue()
     came_from = dict()
     cost_so_far = dict()
@@ -113,19 +111,19 @@ def find_path (source_point, destination_point, mesh):
 
         for next in mesh['adj'][current]:
             # find detail point in 'next'
-            if detail_points[point_number][0] <= next[0]:
+            if detail_points[current][0] <= next[0]:
                 detail_x = next[0]
-            elif detail_points[point_number][0] >= next[1]:
+            elif detail_points[current][0] >= next[1]:
                 detail_x = next[1]
             else:
-                detail_x = detail_points[point_number][0]
+                detail_x = detail_points[current][0]
 
-            if detail_points[point_number][1] <= next[2]:
+            if detail_points[current][1] <= next[2]:
                 detail_y = next[2]
-            elif detail_points[point_number][1] >= next[3]:
+            elif detail_points[current][1] >= next[3]:
                 detail_y = next[3]
             else:
-                detail_y = detail_points[point_number][1]
+                detail_y = detail_points[current][1]
 
             detail_points[next] = detail_x, detail_y
 
