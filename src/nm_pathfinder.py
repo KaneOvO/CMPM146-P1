@@ -2,6 +2,23 @@ from queue import Queue, PriorityQueue
 from math import inf, sqrt
 from heapq import heappop, heappush
 
+def find_point(point,box):
+    if point[0] <= box[0]:
+        x = box[0]
+    elif point[0] >= box[1]:
+        x = box[1]
+    else:
+        x = point[0]
+
+    if point[1] <= box[2]:
+        y = box[2]
+    elif point[1] >= box[3]:
+        y = box[3]
+    else:
+        y = point[1]
+
+    return x, y
+
 def Euclidean_distances(p1, p2):
     distance = 0
 
@@ -90,64 +107,59 @@ def find_path (source_point, destination_point, mesh):
 
     # step 4 Implement the A* algorithm
     frontier = PriorityQueue()
-    came_from = dict()
-    cost_so_far = dict()
-    came_from[sourceBox] = None
-    cost_so_far[sourceBox] = 0
-    frontier.put((cost_so_far[sourceBox],sourceBox))
-
-    detail_points[sourceBox] = source_point
+    #A dictionary with key as the box's coordinates stores the following content
+    #           [0]box's coordinates,[1]detail_point,[2]goal,       [3]prev_box, [4]cost so far
+    forward = {sourceBox: [sourceBox, source_point, destination_point, None, 0]}
+    frontier.put((0,sourceBox))
     
 
+    
     while not frontier.empty():
+        #A temporary variable, internally the priority and box
         temp = frontier.get()
-        current = temp[1]
-        cost_so_far[current] = temp[0]
+        #Extraction Box
+        forwardBox = temp[1]
+        #Extract the box dictionary
+        forwardCurrent = forward[forwardBox]
+        #Record the boxes found by the algorithm for each box
+        boxes.append(forwardBox)
         
-        boxes.append(current)
+        if forwardBox == destinationBox: 
 
-        if current == destinationBox: 
             break
 
-        for next in mesh['adj'][current]:
-            # find detail point in 'next'
-            if detail_points[current][0] <= next[0]:
-                detail_x = next[0]
-            elif detail_points[current][0] >= next[1]:
-                detail_x = next[1]
-            else:
-                detail_x = detail_points[current][0]
+        #Traversing the box's neighbors
+        for forwardNext in mesh['adj'][forwardBox]:
+            #Finding the point of connection to neighbors
+            forwardNext_point = find_point(forwardCurrent[1],forwardNext)
+            #Calculate the cost, the current cost + the cost from the current point to the next point
+            forwardNext_cost = forwardCurrent[4] + Euclidean_distances(forwardNext_point, forwardCurrent[1])
 
-            if detail_points[current][1] <= next[2]:
-                detail_y = next[2]
-            elif detail_points[current][1] >= next[3]:
-                detail_y = next[3]
-            else:
-                detail_y = detail_points[current][1]
-
-            detail_points[next] = detail_x, detail_y
-
-            new_cost = cost_so_far[current] + Euclidean_distances(detail_points[current], detail_points[next])
-
-            if next not in cost_so_far or new_cost < cost_so_far[next]:
-                cost_so_far[next] = new_cost
-                priority = new_cost + Euclidean_distances(detail_points[next], destination_point)
-                frontier.put((priority,next))
-                came_from[next] = current
+            #If unrecorded or less costly than past records
+            if forwardNext not in forward or forwardNext_cost < forward[forwardNext][4]:
+                #Update dictionary
+                forward[forwardNext] = [forwardNext, forwardNext_point, destination_point, forwardBox, forwardNext_cost]
+                #Calculate the cost of this path to the end point
+                priority = forwardNext_cost + Euclidean_distances(forwardNext_point, destination_point)
+                #Put in priority queue
+                frontier.put((priority,forwardNext))
                 
 
+    if destinationBox in forward:
 
-    if destinationBox in came_from:
-        print("Found path!")
+        #Record the end point path
+        path.append(destination_point)
 
         curr_box = destinationBox
-        path.append(destination_point)
+
+        #Traverse to the beginning
         while curr_box != sourceBox:
-            path.append(detail_points[curr_box])
-            curr_box = came_from[curr_box]
+            path.append(forward[curr_box][1])
+            curr_box = forward[curr_box][3]
 
+        #Record the end point path and Rotate the path to the correct order
         path.append(source_point)
-
+        path.reverse()
     else:
         print("No path!")
 
