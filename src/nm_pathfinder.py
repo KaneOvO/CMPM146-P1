@@ -1,3 +1,7 @@
+# CMPM 146 P1: Navmesh Pathfinding
+# Team Member:
+# Zexuan Li
+# Malachi Maldonado
 from queue import Queue, PriorityQueue
 from math import inf, sqrt
 from heapq import heappop, heappush
