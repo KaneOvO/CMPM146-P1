@@ -67,6 +67,11 @@ def find_path (source_point, destination_point, mesh):
     if sourceBox == None or destinationBox == None:
         print("No path!")
         return path, boxes
+    
+    print("source point: ", source_point)
+    print("source Box: ",sourceBox)
+    print("destination point: ", destination_point)
+    print("Destination Box: ",destinationBox)
 
     # # step 2 Implement the simplest complete search algorithm you can
     # # a simple BFS   
@@ -111,7 +116,8 @@ def find_path (source_point, destination_point, mesh):
     #           [0]box's coordinates,[1]detail_point,[2]goal,       [3]prev_box, [4]cost so far
     forward = {sourceBox: [sourceBox, source_point, destination_point, None, 0]}
     frontier.put((0,sourceBox, 0))
-    
+    # Determine if the path was found 
+    find = False
     # step 5: make the A* algorithm bidirectional
     #         Making a new dictionary to search from the destination
     backward = {destinationBox: [destinationBox, destination_point, source_point, None, 0]}
@@ -122,13 +128,57 @@ def find_path (source_point, destination_point, mesh):
         temp = frontier.get()
         #Extraction Box
         currentBox = temp[1]
+        boxes.append(currentBox)
 
         #check if the current box has been seen by the other search. This means we're done!
         if  temp[2] == 0 and temp[1] in backward:
             print("forward met backward")
+
+            #Found the path
+            find = True
+            
+            curr_box = currentBox
+
+            #Traverse to the beginning
+            while curr_box != sourceBox:
+                path.append(forward[curr_box][1])
+                curr_box = forward[curr_box][3]
+            
+            path.append(source_point)
+
+            #Traverse to the end
+            curr_box = currentBox
+            while curr_box != destinationBox:
+                path.insert(0,backward[curr_box][1])   
+                curr_box = backward[curr_box][3]
+            
+            path.insert(0,destination_point)
+            path.reverse()
             break
         elif temp[2] == 1 and temp[1] in forward:
             print("backward met forward")
+
+            #Found the path
+            find = True
+
+            curr_box = currentBox
+
+            #Traverse to the beginning
+            while curr_box != sourceBox:
+                path.append(forward[curr_box][1])
+                curr_box = forward[curr_box][3]
+            
+            path.append(source_point)
+
+            #Traverse to the end
+            curr_box = currentBox
+            while curr_box != destinationBox:
+                path.insert(0,backward[curr_box][1])   
+                curr_box = backward[curr_box][3]
+            
+            path.insert(0,destination_point)
+            path.reverse()
+            
             break
 
 
@@ -139,12 +189,35 @@ def find_path (source_point, destination_point, mesh):
         else:
             forwardCurrent = backward[currentBox]
         #Record the boxes found by the algorithm for each box
-        boxes.append(currentBox)
+        
         
         #if goal box is reached, break, for either direction
         if temp[2] == 0 and currentBox == destinationBox: 
+            #Found the path
+            find = True
+            #Record the end point path
+            path.append(destination_point)
+            curr_box = destinationBox
+            #Traverse to the beginning
+            while curr_box != sourceBox:
+                path.append(forward[curr_box][1])
+                curr_box = forward[curr_box][3]
+            #Record the start point path and Rotate the path to the correct order
+            path.append(source_point)
+            path.reverse()
             break
         elif temp[2] == 1 and currentBox == sourceBox:
+            #Found the path
+            find = True
+            #Record the start point path
+            path.append(source_point)
+            curr_box = sourceBox
+            #Traverse to the end
+            while curr_box != destinationBox:
+                path.append(backward[curr_box][1])
+                curr_box = backward[curr_box][3]
+            #Record the end point path
+            path.append(destination_point)
             break
 
         #Traversing the box's neighbors
@@ -166,34 +239,35 @@ def find_path (source_point, destination_point, mesh):
             elif temp[2] == 1:
                 if forwardNext not in backward or forwardNext_cost < backward[forwardNext][4]:
                     #Update dictionary
-                    backward[forwardNext] = [forwardNext, forwardNext_point, destination_point, currentBox, forwardNext_cost]
+                    backward[forwardNext] = [forwardNext, forwardNext_point, source_point, currentBox, forwardNext_cost]
                     #Calculate the cost of this path to the source point
                     priority = forwardNext_cost + Euclidean_distances(forwardNext_point, source_point)
                     #Put in priority queue
                     frontier.put((priority,forwardNext, 1))
                 
-
-    if destinationBox in forward:
-
-        #Record the end point path
-        path.append(destination_point)
-
-        curr_box = destinationBox
-
-        #Traverse to the beginning
-        while curr_box != sourceBox:
-            path.append(forward[curr_box][1])
-            curr_box = forward[curr_box][3]
-
-        #Record the end point path and Rotate the path to the correct order
-        path.append(source_point)
-        path.reverse()
-    else:
+    if find == False:
         print("No path!")
 
-    print("source point: ", source_point)
-    print("source Box: ",sourceBox)
-    print("destination point: ", destination_point)
-    print("Destination Box: ",destinationBox)
+
+
+    # if destinationBox in forward:
+
+    #     #Record the end point path
+    #     path.append(destination_point)
+
+    #     curr_box = destinationBox
+
+    #     #Traverse to the beginning
+    #     while curr_box != sourceBox:
+    #         path.append(forward[curr_box][1])
+    #         curr_box = forward[curr_box][3]
+
+    #     #Record the end point path and Rotate the path to the correct order
+    #     path.append(source_point)
+    #     path.reverse()
+    # else:
+    #     print("No path!")
+
+
     print(path)
     return path, boxes
