@@ -110,39 +110,67 @@ def find_path (source_point, destination_point, mesh):
     #A dictionary with key as the box's coordinates stores the following content
     #           [0]box's coordinates,[1]detail_point,[2]goal,       [3]prev_box, [4]cost so far
     forward = {sourceBox: [sourceBox, source_point, destination_point, None, 0]}
-    frontier.put((0,sourceBox))
+    frontier.put((0,sourceBox, 0))
     
+    # step 5: make the A* algorithm bidirectional
+    #         Making a new dictionary to search from the destination
+    backward = {destinationBox: [destinationBox, destination_point, source_point, None, 0]}
+    frontier.put((0,destinationBox, 1))
 
-    
     while not frontier.empty():
-        #A temporary variable, internally the priority and box
+        #A temporary variable, internally the priority, box, and goal (0 for dest, 1 for source)
         temp = frontier.get()
         #Extraction Box
-        forwardBox = temp[1]
-        #Extract the box dictionary
-        forwardCurrent = forward[forwardBox]
-        #Record the boxes found by the algorithm for each box
-        boxes.append(forwardBox)
-        
-        if forwardBox == destinationBox: 
+        currentBox = temp[1]
 
+        #check if the current box has been seen by the other search. This means we're done!
+        if  temp[2] == 0 and temp[1] in backward:
+            print("forward met backward")
+            break
+        elif temp[2] == 1 and temp[1] in forward:
+            print("backward met forward")
+            break
+
+
+        #Extract the box dictionary; if goal is destination, get box info from forward table.
+        #Otherwise, get it from backward table.
+        if temp[2] == 0: 
+            forwardCurrent = forward[currentBox]
+        else:
+            forwardCurrent = backward[currentBox]
+        #Record the boxes found by the algorithm for each box
+        boxes.append(currentBox)
+        
+        #if goal box is reached, break, for either direction
+        if temp[2] == 0 and currentBox == destinationBox: 
+            break
+        elif temp[2] == 1 and currentBox == sourceBox:
             break
 
         #Traversing the box's neighbors
-        for forwardNext in mesh['adj'][forwardBox]:
+        for forwardNext in mesh['adj'][currentBox]:
             #Finding the point of connection to neighbors
             forwardNext_point = find_point(forwardCurrent[1],forwardNext)
             #Calculate the cost, the current cost + the cost from the current point to the next point
             forwardNext_cost = forwardCurrent[4] + Euclidean_distances(forwardNext_point, forwardCurrent[1])
 
             #If unrecorded or less costly than past records
-            if forwardNext not in forward or forwardNext_cost < forward[forwardNext][4]:
-                #Update dictionary
-                forward[forwardNext] = [forwardNext, forwardNext_point, destination_point, forwardBox, forwardNext_cost]
-                #Calculate the cost of this path to the end point
-                priority = forwardNext_cost + Euclidean_distances(forwardNext_point, destination_point)
-                #Put in priority queue
-                frontier.put((priority,forwardNext))
+            if temp[2] == 0:
+                if forwardNext not in forward or forwardNext_cost < forward[forwardNext][4]:
+                    #Update dictionary
+                    forward[forwardNext] = [forwardNext, forwardNext_point, destination_point, currentBox, forwardNext_cost]
+                    #Calculate the cost of this path to the end point
+                    priority = forwardNext_cost + Euclidean_distances(forwardNext_point, destination_point)
+                    #Put in priority queue
+                    frontier.put((priority,forwardNext, 0))
+            elif temp[2] == 1:
+                if forwardNext not in backward or forwardNext_cost < backward[forwardNext][4]:
+                    #Update dictionary
+                    backward[forwardNext] = [forwardNext, forwardNext_point, destination_point, currentBox, forwardNext_cost]
+                    #Calculate the cost of this path to the source point
+                    priority = forwardNext_cost + Euclidean_distances(forwardNext_point, source_point)
+                    #Put in priority queue
+                    frontier.put((priority,forwardNext, 1))
                 
 
     if destinationBox in forward:
